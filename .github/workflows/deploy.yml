@@ -1,7 +1,7 @@
-name: Deploy FastAPI API
+name: Deploy FastAPI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -10,20 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.8.0
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Add Server to Known Hosts
+        run: ssh-keyscan -H your-server.com >> ~/.ssh/known_hosts
+
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          cd /path/to/your/fastapi/project
+          ssh user@your-server.com << 'EOF'
+          cd /path/to/your/project
           git pull origin main
           source venv/bin/activate
           pip install -r requirements.txt
-          sudo systemctl restart fastapi
+          systemctl restart your-app-service
+          systemctl restart nginx
           EOF
