@@ -1,9 +1,6 @@
 name: Test FastAPI Application
 
-on:
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   test:
@@ -20,9 +17,12 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests with pytest
         run: |
+          source venv/bin/activate
           pytest --disable-warnings
