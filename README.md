@@ -138,7 +138,6 @@ sudo systemctl enable fastapi
 sudo systemctl start fastapi
 ```
 
-
 ### Test Deployment
 ```bash
 curl http://YOUR_EC2_IP/
