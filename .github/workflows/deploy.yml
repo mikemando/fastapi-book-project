@@ -1,7 +1,7 @@
-name: Deploy FastAPI
+name: Deploy to EC2
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -11,23 +11,18 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add Server to Known Hosts
-        run: ssh-keyscan -H your-server.com >> ~/.ssh/known_hosts
-
-      - name: Deploy to Server
-        run: |
-          ssh user@your-server.com << 'EOF'
-          cd /path/to/your/project
-          git pull origin main
-          source venv/bin/activate
-          pip install -r requirements.txt
-          systemctl restart your-app-service
-          systemctl restart nginx
-          EOF
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/fastapi-app
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart gunicorn
+            sudo systemctl restart nginx
